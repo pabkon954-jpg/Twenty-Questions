@@ -15,7 +15,9 @@ const io = new Server(httpServer, {
   cors: { origin: "*", methods: ["GET", "POST"] }
 });
 
-app.use(express.static(path.join(__dirname, 'public')));
+// ✅ index.html / script.js / style.css가 별도 public 폴더 없이 저장소 최상위에 있으므로,
+//    서버 파일과 같은 위치(__dirname)에서 바로 정적 파일을 서빙하도록 변경
+app.use(express.static(__dirname));
 
 if (!process.env.GROQ_API_KEY) {
   console.warn('⚠️  경고: GROQ_API_KEY 환경변수가 설정되지 않았습니다!');
