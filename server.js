@@ -98,7 +98,9 @@ async function generateWordByDifficulty(difficulty = 'normal', categories = []) 
     const completion = await groq.chat.completions.create({
       messages: [{ role: 'user', content: prompt }],
       model: 'openai/gpt-oss-20b',
-      temperature: 0.8
+      temperature: 0.8,
+      reasoning_effort: 'low', // ✅ gpt-oss는 추론형 모델 — 낮게 설정 안 하면 생각하다가 토큰을 다 씀
+      max_tokens: 200 // ✅ 추론 토큰까지 포함되므로 넉넉하게 확보
     });
 
     const word = completion.choices[0]?.message?.content?.trim().replace(/[^가-힣]/g, '');
@@ -138,7 +140,8 @@ async function askAI(targetWord, userQuestion, difficulty) {
       messages: [{ role: 'user', content: judgePrompt }],
       model: 'openai/gpt-oss-20b',
       temperature: 0.0,
-      max_tokens: 10
+      reasoning_effort: 'low', // ✅ 핵심 수정: 이게 없으면 추론만 하다가 답을 못 냄
+      max_tokens: 150 // ✅ 기존 10은 추론 토큰만으로 다 소진되어 항상 빈 응답 → "관련 없음" 처리되던 버그
     });
 
     let rawJudgement = judgeCompletion.choices[0]?.message?.content?.trim() || "관련 없음.";
@@ -168,7 +171,8 @@ async function askAI(targetWord, userQuestion, difficulty) {
       messages: [{ role: 'user', content: tauntPrompt }],
       model: 'openai/gpt-oss-20b',
       temperature: 0.6,
-      max_tokens: 100
+      reasoning_effort: 'low',
+      max_tokens: 250
     });
 
     const taunt = tauntCompletion.choices[0]?.message?.content?.trim() || "질문 수준 하고는.";
@@ -204,7 +208,8 @@ async function generateHint(targetWord, hintLevel) {
       messages: [{ role: 'user', content: hintPrompt }],
       model: 'openai/gpt-oss-20b',
       temperature: 0.5,
-      max_tokens: 60
+      reasoning_effort: 'low',
+      max_tokens: 200
     });
     const hintText = hintCompletion.choices[0]?.message?.content?.trim() || "조금 더 구체적으로 생각해보세요!";
     return `💡 힌트: ${hintText}`;
