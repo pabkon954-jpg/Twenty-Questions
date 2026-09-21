@@ -1,4 +1,4 @@
-cat > /mnt/user-data/outputs/server.js << 'SERVEREOF'
+import 'dotenv/config';
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
@@ -16,6 +16,12 @@ const io = new Server(httpServer, {
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
+
+if (!process.env.GROQ_API_KEY) {
+  console.warn('⚠️  경고: GROQ_API_KEY 환경변수가 설정되지 않았습니다!');
+  console.warn('⚠️  .env 파일에 GROQ_API_KEY=your_key_here 를 추가하거나 환경변수로 등록해주세요.');
+  console.warn('⚠️  키가 없으면 AI가 작동하지 않고 미리 정해둔 단어/고정 답변만 사용됩니다.');
+}
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 const rooms = {};
@@ -91,7 +97,7 @@ async function generateWordByDifficulty(difficulty = 'normal', categories = []) 
 
     const completion = await groq.chat.completions.create({
       messages: [{ role: 'user', content: prompt }],
-      model: 'llama-3.1-8b-instant',
+      model: 'openai/gpt-oss-20b',
       temperature: 0.8
     });
 
@@ -130,7 +136,7 @@ async function askAI(targetWord, userQuestion, difficulty) {
 
     const judgeCompletion = await groq.chat.completions.create({
       messages: [{ role: 'user', content: judgePrompt }],
-      model: 'llama-3.1-8b-instant',
+      model: 'openai/gpt-oss-20b',
       temperature: 0.0,
       max_tokens: 10
     });
@@ -160,7 +166,7 @@ async function askAI(targetWord, userQuestion, difficulty) {
 
     const tauntCompletion = await groq.chat.completions.create({
       messages: [{ role: 'user', content: tauntPrompt }],
-      model: 'llama-3.1-8b-instant',
+      model: 'openai/gpt-oss-20b',
       temperature: 0.6,
       max_tokens: 100
     });
@@ -196,7 +202,7 @@ async function generateHint(targetWord, hintLevel) {
 `;
     const hintCompletion = await groq.chat.completions.create({
       messages: [{ role: 'user', content: hintPrompt }],
-      model: 'llama-3.1-8b-instant',
+      model: 'openai/gpt-oss-20b',
       temperature: 0.5,
       max_tokens: 60
     });
